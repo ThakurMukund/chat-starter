@@ -1,0 +1,23 @@
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
+aioredis==2.0.1
+sqlalchemy[asyncio]==1.4.48
+asyncpg==0.27.0
+pydantic==1.10.7
+prometheus-client==0.16.0
+
+# OpenAI SDK
+openai==1.41.1
+
+# Observability / tracing
+opentelemetry-api==1.14.0
+opentelemetry-sdk==1.14.0
+opentelemetry-instrumentation==0.37b0
+opentelemetry-exporter-jaeger==1.14.0
+
+# Logging and config
+loguru==0.7.0
+python-dotenv==1.0.1
+
+# HTTP client (used internally by OpenAI or other async tasks)
+httpx==0.24.0

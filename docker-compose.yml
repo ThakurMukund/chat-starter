@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: chatdb
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    ports:
+    - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+    - "6379:6379"
+
+  backend:
+    build: ./backend
+    depends_on:
+    - postgres
+    - redis
+    env_file:
+      - ./backend/.env
+    volumes:
+    - ./backend/app:/app
+    ports:
+    - "8000:8000"
+    environment:
+    - DATABASE_URL=postgresql+asyncpg://postgres:example@postgres:5432/chatdb
+    - REDIS_URL=redis://redis:6379/0
+
+  frontend:
+    build: ./frontend
+    volumes:
+    - ./frontend:/usr/src/app
+    - /usr/src/app/node_modules
+    ports:
+    - "5173:5173"
+    environment:
+    - VITE_BACKEND_URL=http://localhost:8000
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+    - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+    - "3000:3000"
+    environment:
+    - GF_SECURITY_ADMIN_PASSWORD=admin
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.41
+    ports:
+    - "16686:16686"
+    - "6831:6831/udp"
+
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+    - "3100:3100"
+
+  promtail:
+    image: grafana/promtail:2.8.2
+    volumes:
+    - /var/log:/var/log
+    - /etc/machine-id:/etc/machine-id
+    command: -config.file=/etc/promtail/config.yml
+
+volumes:
+  pgdata:
